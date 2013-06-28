@@ -1,0 +1,77 @@
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+<script type="text/javascript" src="js/swfobject.js"></script>
+<style type="text/css">
+<!--
+body {
+	margin-left: 0px;
+	margin-top: 0px;
+	margin-right: 0px;
+	margin-bottom: 0px;
+	background: #000000;
+	text-align: center;
+}
+-->
+</style>
+</head>
+<meta http-equiv="Content-Type" content="text/html; charset=GB2312" />
+<title></title>
+
+<body >
+<script type="text/javascript">
+var flashvars = { 
+	
+};  
+var params = {  
+  menu: "true" ,
+  allowScriptAccess:"always",
+  transparent:"true",
+  wmode:"opaque"
+};  
+var attributes = {  
+  id: "myDynamicContent",  
+  name: "myDynamicContent"  
+};  
+var myDate=new Date();
+var _v=myDate.getTime();
+swfobject.embedSWF("sharen_test.swf", "swfContent", "100%", "100%", "10.0.0","expressInstall.swf", flashvars, params, attributes); </script>
+<div id="swfContent"  align="center"></div>
+<script type="text/javascript">
+var _pageHeight=800;
+function setPageHeight(__h){
+  _pageHeight=__h;
+  jQuery("body").height(_pageHeight);
+}
+function setScrollTop(__t){
+   document.body.scrollTop=__t+"px";
+}
+function getParam(name){
+        var search = document.location.search;
+        var pattern = new RegExp("[?&]"+name+"\=([^&]+)", "g");
+        var matcher = pattern.exec(search);
+        var items = null;
+        if(null != matcher){
+                try{
+                        items = decodeURIComponent(decodeURIComponent(matcher[1]));
+                }catch(e){
+                        try{
+                                items = decodeURIComponent(matcher[1]);
+                        }catch(e){
+                                items = matcher[1];
+                        }
+                }
+        }
+        return items;
+};
+
+setTimeout(function(){jQuery("body").height(_pageHeight); },100);
+function showFontName(__name){
+	alert(__name);
+}
+jQuery(function() {
+	setPageHeight(800);
+})
+
+</script>
+</body>
+</html>
