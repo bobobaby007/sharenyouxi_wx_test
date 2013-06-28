@@ -18,6 +18,7 @@ class sharenyouxi_main{
 		//echo $postStr;
 		//exit();
 		//extract post data
+		$this->postText("weg");
 		if (! empty ( $postStr )) {
 			//checkWxId();
 			$postObj = simplexml_load_string ( $postStr, 'SimpleXMLElement', LIBXML_NOCDATA );
