@@ -1,82 +1,54 @@
 <?php
-class roomObj {
+class roomObj{
+	static public $_self;
+	public $user_me;
 	
-	public function valid() {
-		$echoStr = $_GET ["echostr"];
-		
-		//valid signature , option
-		if ($this->checkSignature ()) {
-			echo $echoStr;
-			exit ();
-		}
-	}
-	//----转换表情命令
-	private function changeEmotionToString($text) {
-		$text = str_replace ( "/::Q", "[抓狂]", $text );
-		$text = str_replace ( "/::O", "[惊讶]", $text );
-		$text = str_replace ( "/:?", "[疑问]", $text );
-		$text = str_replace ( "/::X", "[闭嘴]", $text );
-		$text = str_replace ( "/:hug", "[拥抱]", $text );
-		$text = str_replace ( "/:bye", "[再见]", $text );
-		$text = str_replace ( "/:li", "[闪电]", $text );
-		$text = str_replace ( "/:kn", "[刀]", $text );
-		$text = str_replace ( "/:pd", "[菜刀]", $text );
-		$text = str_replace ( "/:,@x", "[嘘]", $text );
-		$text = str_replace ( "/:ok", "[OK]", $text );
-		$text = str_replace ( "/:jj", "[勾引]", $text );
-		$text = str_replace ( "/:handclap", "[鼓掌]", $text );
-		
-		//$this->postText($text);
-		return $text;
+	public function init(){		
+		self::$_self=$this;	
 	}
 	public function responseMsg() {
 		global $dateTime, $keyword, $user_me;
+				
 		$dateTime = date ( "Y-m-d H:i:s", time () );
-		if (! $this->checkSignature ()) {
-			//echo $echoStr;
-		//exit ();
-		}
+		
 		//get post data, May be due to the different environments
 		$postStr = $GLOBALS ["HTTP_RAW_POST_DATA"];
 		//echo $postStr;
 		//exit();
 		//extract post data
+		
 		if (! empty ( $postStr )) {
 			//checkWxId();
-			
-
 			$postObj = simplexml_load_string ( $postStr, 'SimpleXMLElement', LIBXML_NOCDATA );
+			
 			
 			global $fromUsername, $toUsername, $keyword;
 			
 			$fromUsername = $postObj->FromUserName;
 			$toUsername = $postObj->ToUserName;
-			$keyword = trim ( $postObj->Content );
-			$keyword = $this->changeEmotionToString ( $keyword );
+			$keyword = trim ( $postObj->Content );		
+			
+			if (sharenyouxi_main::$_self->is_from_main){
+				$keyword = "[闭嘴]";					
+				$this->testText ( $keyword );
+			}
+			
+			$keyword = wechatCallbackapi::$_self->changeEmotionToString ( $keyword );
+			
+			
 			
 			$inputType = trim ( $postObj->MsgType );
 			$time = time ();
 			
-			$this->checkWxId ();
+			
 			$this->checkLastAction ();
 			
 			$contentStr;
 			if (! empty ( $keyword )) {
-				if ($keyword == "?" || $keyword == "？" || $keyword == "帮助" || $keyword == "[疑问]" || $keyword == "规则" || $keyword == "怎么玩" || $keyword == "怎么玩？" || $keyword == "怎么玩?" || $keyword == "怎么玩啊" || $keyword == "怎么玩啊？" || $keyword == "help") {
-					$this->postText ( help_basic );
-				} else if ($keyword == "杀人游戏" || $keyword == "[杀人游戏]") {
-					$this->postPic ( "http://wx.sharen.4view.cn/getqrcode.jpg" );
-				} else if ($keyword == "you") {
 				
-		//$this->postText($toUsername);
-				} else if ($keyword == "人" || $keyword == "[人]") {
-					$this->postText ( $this->showAllUsers () );
-				} else if ($keyword == "me") {
-					//$this->postText($fromUsername);
-				} else {
 					//$this->postText("游戏即将上线！加紧测试中..");				
-					$this->testText ( $keyword );
-				}
+				$this->testText ( $keyword );
+				
 			} else {
 				if ($inputType == "event") {
 					if (trim ( $postObj->MsgType ) == "unsubscribe") {
@@ -159,6 +131,9 @@ class roomObj {
 		
 		$first_index = stripos ( $text, "[" );
 		$index = stripos ( $text, "]" );
+		if ($text == "?" || $text == "？" || $text == "帮助" || $text == "[疑问]" || $text == "规则" || $text == "怎么玩" || $text == "怎么玩？" || $text == "怎么玩?" || $text == "怎么玩啊" || $text == "怎么玩啊？" || $text == "help") {
+					$this->postText ( help_basic );
+		} 		
 		if ($index && $index < 10 && $first_index == 0) {
 			$order = substr ( $text, 0, $index + 1 );
 			$content = substr ( $text, $index + 1 );
@@ -181,6 +156,9 @@ class roomObj {
 				$this->saveReadyAction ( "1000501", "" );
 				$this->postText ( "欢迎来到杀人游戏世界，初次见面，请问阁下怎么称呼？" );
 			}
+		}
+		if ($text == "人" || $text == "[人]") {
+			$this->postText ( $this->showAllUsers () );
 		}
 		if ($text == "杀人游戏" || $text == "[杀人游戏]") {
 			$this->postPic ( "http://wx.sharen.4view.cn/getqrcode.jpg" );
@@ -1543,47 +1521,11 @@ class roomObj {
 	}
 	//发布文字信息
 	public function postText($text) {
-		global $con;
-		$textTpl = "<xml>
-							<ToUserName><![CDATA[%s]]></ToUserName>
-							<FromUserName><![CDATA[%s]]></FromUserName>
-							<CreateTime>%s</CreateTime>
-							<MsgType><![CDATA[%s]]></MsgType>
-							<Content><![CDATA[%s]]></Content>
-							<FuncFlag>0</FuncFlag>
-							</xml>";
-		$time = time ();
-		global $fromUsername, $toUsername;
-		$resultStr = sprintf ( $textTpl, $fromUsername, $toUsername, $time, "text", $text );
-		echo $resultStr;
-		mysql_close ( $con );
-		exit ();
+		wechatCallbackapi::$_self->postText($text);
 	}
 	//发布二维码信息
 	public function postPic($picUlr) {
-		global $con;
-		$textTpl = "<xml>
- <ToUserName><![CDATA[%s]]></ToUserName>
- <FromUserName><![CDATA[%s]]></FromUserName>
- <CreateTime>%s</CreateTime>
- <MsgType><![CDATA[news]]></MsgType>
- <ArticleCount>1</ArticleCount>
- <Articles>
- <item>
- <Title><![CDATA[[杀人游戏]\n(微信帐号:sharenyouxi_wx)]]></Title>
- <Description><![CDATA[微信也可以玩杀人游戏啦，不受时间、地点限制，随时随地推理、辩护！扫瞄二维码关注[杀人游戏]帐号,或直接输入微信帐号:sharenyouxi_wx加好友。]]></Description>
- <PicUrl><![CDATA[%s]]></PicUrl>
- <Url><![CDATA[http://wx.sharen.4view.cn/qrcode.html]]></Url>
- </item>
- </Articles>
- <FuncFlag>1</FuncFlag>
- </xml> ";
-		$time = time ();
-		global $fromUsername, $toUsername;
-		$resultStr = sprintf ( $textTpl, $fromUsername, $toUsername, $time, $picUlr );
-		echo $resultStr;
-		mysql_close ( $con );
-		exit ();
+		wechatCallbackapi::$_self->postPic($picUlr);
 	}
 	//测试信息
 	private function myTest() {
@@ -1591,23 +1533,6 @@ class roomObj {
 		$arr = array ('a' => 1, 'b' => 2, 'c' => 3, 'd' => 4, 'e' => 5 );
 		$this->postText ( json_encode ( $arr ) );
 	
-	}
-	private function checkSignature() {
-		$signature = $_GET ["signature"];
-		$timestamp = $_GET ["timestamp"];
-		$nonce = $_GET ["nonce"];
-		
-		$token = TOKEN;
-		$tmpArr = array ($token, $timestamp, $nonce );
-		sort ( $tmpArr );
-		$tmpStr = implode ( $tmpArr );
-		$tmpStr = sha1 ( $tmpStr );
-		
-		if ($tmpStr == $signature) {
-			return true;
-		} else {
-			return false;
-		}
 	}
 }
 ?>

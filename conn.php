@@ -1,5 +1,4 @@
 <?php
-//Á¬½Ó
 $con = mysql_connect ( "localhost", "root", "85bcc87cc3" );
 if (! $con) {
 	die ( 'Could not connect: ' . mysql_error () );

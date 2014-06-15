@@ -3,6 +3,7 @@ include_once 'conn.php';
 include_once 'defines.php';
 include_once 'wechatCallbackapi.php';
 include_once 'sharenyouxi_main.php';
+
 /**
  * wechat php test
  */
@@ -36,15 +37,18 @@ $my_room;
 $user_ready_to;
 $keyword;
 
-$dateTime;
+$dateTime=new DateTime();
 
 
 
 $wechatObj = new wechatCallbackapi ();
 $wechatObj->init();
 //$wechatObj->valid();
+//$wechatObj->responseMsg ();
+
 $sharenyouxi=new sharenyouxi_main();
 $sharenyouxi->init();
+
 
 //$wechatObj->responseMsg ();
 ?>

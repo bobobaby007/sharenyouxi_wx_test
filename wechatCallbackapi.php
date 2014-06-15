@@ -36,6 +36,7 @@ class wechatCallbackapi {
 		$text = str_replace ( "/:,@x", "[嘘]", $text );
 		$text = str_replace ( "/:ok", "[OK]", $text );
 		$text = str_replace ( "/:jj", "[勾引]", $text );
+		$text = str_replace ( "/:@@", "[拳头]", $text );
 		$text = str_replace ( "/:handclap", "[鼓掌]", $text );
 		
 		//$this->postText($text);
